@@ -1,0 +1,63 @@
+class ScriptInclude {
+	String uri
+	File file
+}
+processResources.configure {
+	doLast {
+		def pluginFile = new File(project.buildDir, "resources/main/rsuite-plugin.xml")
+		def pluginXml = (new XmlParser()).parse(pluginFile)
+		def staticWebServices = pluginXml
+			.extensionProvider
+			.findAll{
+				it.'@id'.equals('rsuite.WebService')
+			}
+			.staticWebService
+			.groupBy([{
+				it.'@root'[0].substring(1)
+			}]).collectEntries({ root, staticWebService ->
+				[ root, staticWebService[0].'@path'[0].substring(1) ]
+			})
+		println "Static webservices"
+		staticWebServices.each{ root, path ->
+			println "\t" + root + " -> " + path
+		}
+		def uiExtensionProvider = pluginXml.extensionProvider.findAll{ 
+			it.'@id'.equals('rsuite.UI') 
+		}.flatten();
+		def scriptIncludes = uiExtensionProvider.scriptInclude.flatten()
+		
+		def files = scriptIncludes
+			.collect{
+				def ret = new ScriptInclude()
+				ret.uri = it.'@src'
+				def parts = ret.uri.split('/')
+				ret.file = new File(new File(destinationDir, staticWebServices[parts[0]]), parts[1..-1].join('/'))
+				ret
+			}
+		scriptIncludes.each{
+			it.parent().remove(it)
+		}
+		def firstSWS = staticWebServices.entrySet().toList().first()
+		def target = new File(new File(destinationDir, firstSWS.value), "all-scripts.js")
+		def targetUri = new URI(firstSWS.key + "/" + "all-scripts.js")
+		println "Creating scriptInclude tag for " + targetUri
+		uiExtensionProvider[0].appendNode('scriptInclude', [ src: targetUri.toString() ])
+		println "Writing modified rsuite-plugin.xml"
+		def writer = new FileWriter(pluginFile);
+		(new XmlNodePrinter(new PrintWriter(writer))).print(pluginXml);
+		def allScriptWriter = target.newWriter('UTF-8');
+		println "Writing all-scripts.js"
+		files.each{
+			println "\t" + it.uri
+			allScriptWriter.writeLine("/* " + it.uri + " */")
+			def reader = it.file.newReader('UTF-8')
+			def buf;
+			while ((buf = reader.readLine()) != null) {
+				allScriptWriter.writeLine(buf);
+			}
+			reader.close()
+			it.file.delete()
+		}
+		allScriptWriter.close()
+	}
+}

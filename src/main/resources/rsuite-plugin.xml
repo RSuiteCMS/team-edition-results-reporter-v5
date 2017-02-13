@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rsuite-plugin id="@pluginId@" version="@pluginVersion@" timestamp="@timeStamp@"
+	description="Enables HTML and Excel reporting of metadata for folder and search results. Also enables metadata to be imported from Excel.">
+    
+    <!-- @pluginId@ = team-edition-results-reporter-->
+
+    <extensionProvider id="rsuite.WebService">
+		<staticWebService path="/WebContent" root="/@pluginId@"/>
+        <remoteApiDefinition id="@pluginId@:UpdateMetadataFromSpreadsheet"
+            handler="com.rsicms.teamEdition.resultsReporter.webservice.UpdateMetadataFromSpreadsheet"
+            description="Update metadata from spreadsheet" />
+        <remoteApiDefinition id="@pluginId@:ProcessReportSubmission"
+            handler="com.rsicms.teamEdition.resultsReporter.webservice.ProcessReportSubmission"
+            description="Report on selected content" />
+        <remoteApiDefinition id="@pluginId@:ReturnReportResults"
+            handler="com.rsicms.teamEdition.resultsReporter.webservice.ReturnReportResults"
+            description="Return the report on the specified format" />
+    </extensionProvider>
+
+    <extensionProvider id="rsuite.UI">
+        <styleInclude src="@pluginId@/style.less" />
+    </extensionProvider>
+    
+    <extensionProvider id="rsuite.Forms">
+        <formDefinition id="@pluginId@:form.updateMetadataFromSpreadsheet"
+            description="Update Metadata from Spreadsheet"
+            label="Update Metadata">
+            <instructions>Include the metadata field names as your header row.</instructions>
+            <column name="col1">
+                <param formControlType="file"
+                    name="spreadsheet"
+                    label="Spreadsheet (Excel)">
+                    <validation required="true" errorMessage="Select the file to upload."/>
+                </param>
+                <param formControlType="checkbox"
+                    name="reportOnly"
+                    label="Show a report of what will happen (don't update metadata)">
+                    <optionList>
+                        <option label="Report only" value="reportOnly"/>
+                    </optionList>
+                </param>
+            </column>
+        </formDefinition>
+        <formDefinition id="@pluginId@:form.processReportSubmission"
+            description="Report on Content"
+            label="Report on Content"
+            handler="com.rsicms.teamEdition.resultsReporter.formhandler.SelectReportColumns">
+        </formDefinition>
+
+        <datatypeDefinition name="teBaseReportColumns"
+            label="Base Columns for Content Reports"
+            baseType="string"
+            description="Base list of fields available for inclusion in content reports">
+            <optionList>
+                <option value="Name"/>
+                <option value="Date Created"/>
+                <option value="Created By"/>
+                <option value="Last Modified"/>
+                <option value="Last Modified By"/>
+                <option value="Check Out Date"/>
+                <option value="Check Out User"/>
+                <option value="Object Type"/>
+                <option value="Content Type"/>
+                <option value="Current Version Number"/>
+                <option value="Thumbnail"/>
+                <option value="Metadata Summary"/>
+            </optionList>
+            <!-- These not included because made available in forms in different way
+                <option value="RSuite Id"/>
+                <option value="Alias"/>
+            -->
+        </datatypeDefinition>
+    </extensionProvider>
+
+    <extensionProvider id="rsuite.ContextMenu">
+        <contextMenuRuleSet name="@pluginId@:exportMetadata" scope="allNodes">
+            <menuItemList>
+                <menuItem id="reportOnContentCa">
+                    <actionName>rsuite:invokeWebservice</actionName>
+                    <label>Report on folder content</label>
+                    <property name="rsuite:icon" value="metadata"/>
+                    <property name="formId" value="@pluginId@:form.processReportSubmission"/>
+                    <property name="timeout" value="0"/>
+                    <property name="remoteApiName" value="@pluginId@:ProcessReportSubmission"/>
+                    <property name="rsuite:group" value="TE"/>
+                    <property name="formParams.exportType" value="ca"/>
+                    <property name="serviceParams.exportType" value="ca"/>
+                    <property name="serviceParams.reportType" value="preview"/>
+                </menuItem>
+            </menuItemList>
+            <ruleList>
+                <rule>include nodeType ca,canode</rule>
+                <rule>exclude role Contributor</rule>
+            </ruleList>
+        </contextMenuRuleSet>
+        <contextMenuRuleSet name="@pluginId@:exportMetadata" scope="searchResults,browseTree">
+            <menuItemList>
+                <menuItem id="reportOnContentResults">
+                    <actionName>rsuite:invokeWebservice</actionName>
+                    <label>Report on results</label>
+                    <property name="rsuite:icon" value="metadata"/>
+                    <property name="formId" value="@pluginId@:form.processReportSubmission"/>
+                    <property name="timeout" value="0"/>
+                    <property name="remoteApiName" value="@pluginId@:ProcessReportSubmission"/>
+                    <property name="rsuite:group" value="TE"/>
+                    <property name="formParams.exportType" value="results"/>
+                    <property name="serviceParams.exportType" value="results"/>
+                    <property name="serviceParams.reportType" value="preview"/>
+                </menuItem>
+            </menuItemList>
+            <ruleList>
+                <rule>exclude role Contributor</rule>
+            </ruleList>
+        </contextMenuRuleSet>
+        <contextMenuRuleSet name="@pluginId@:exportMetadata" scope="clipboard">
+            <menuItemList>
+                <menuItem id="reportOnContentBriefcase">
+                    <actionName>rsuite:invokeWebservice</actionName>
+                    <label>Report on briefcase content</label>
+                    <property name="rsuite:icon" value="metadata"/>
+                    <property name="formId" value="@pluginId@:form.processReportSubmission"/>
+                    <property name="timeout" value="0"/>
+                    <property name="remoteApiName" value="@pluginId@:ProcessReportSubmission"/>
+                    <property name="rsuite:group" value="TE"/>
+                    <property name="formParams.exportType" value="briefcase"/>
+                    <property name="serviceParams.exportType" value="briefcase"/>
+                    <property name="serviceParams.reportType" value="preview"/>
+                </menuItem>
+            </menuItemList>
+            <ruleList>
+                <rule>exclude role Contributor</rule>
+            </ruleList>
+        </contextMenuRuleSet>
+
+        <!-- system -->
+        <contextMenuRuleSet name="@pluginId@:updateMetadata" scope="system">
+            <menuItemList>
+                <menuItem id="updateMetadataFromSpreadsheet">
+                    <actionName>rsuite:invokeWebservice</actionName>
+                    <label>Update metadata from spreadsheet</label>
+                    <property name="remoteApiName" value="@pluginId@:UpdateMetadataFromSpreadsheet"/>
+                    <property name="timeout" value="0"/>
+                    <property name="useTransport" value="window"/>
+                    <property name="windowOptions.height" value="600"/>
+                    <property name="windowOptions.width" value="800"/>
+                    <property name="windowOptions.resize" value="1"/>
+                    <property name="rsuite:icon" value="metadata"/>
+                    <property name="formId" value="@pluginId@:form.updateMetadataFromSpreadsheet"/>
+                    <property name="rsuite:group" value="TE"/>
+                </menuItem>
+            </menuItemList>
+            <ruleList>
+                <rule>exclude role Contributor</rule>
+            </ruleList>
+        </contextMenuRuleSet>
+        <!-- /system -->
+
+    </extensionProvider>
+</rsuite-plugin>

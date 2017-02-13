@@ -1,0 +1,109 @@
+html {
+    font-family: arial, helvetica, sans-serif;
+    font-size: .8em;
+}
+h1 {
+    margin-bottom: 6px;
+    color: #424242;
+    font-size: 1.2em;
+}
+h2 {
+    margin-bottom: 4px;
+    color: #424242;
+    font-size: 1em;
+}
+table {
+    border: 1px solid #aaaaaa;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: .9em;
+    counter-reset: row;
+}
+tbody tr {
+    vertical-align: top;
+    counter-increment: row;
+}
+thead tr:before {
+    content: "#";
+    background-color: #f1f1f1;
+    color: #797979;
+    text-align: left;
+    border-right: 1px solid #ffffff;
+    display: table-cell;
+    padding-left: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+tbody tr:before {
+    content: counter(row);
+    display: table-cell;
+    padding-left: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+tr:nth-of-type(2n) {
+    background-color: #f0f0ff;
+}
+table.plain {
+    border: none;
+    font-size: .9em;
+    counter-reset: none;
+}
+table.plain tbody tr {
+    vertical-align: top;
+    counter-increment: none;
+}
+table.plain thead tr:before {
+    display: none;
+}
+table.plain tbody tr:before {
+    display: none;
+}
+table.plain tr:nth-of-type(2n) {
+    background-color: inherit;
+}
+td, th {
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+th {
+    vertical-align: top;
+    background-color: #f1f1f1;
+    color: #797979;
+    text-align: left;
+    border-right: 1px solid #ffffff;
+}
+table.plain th {
+    vertical-align: top;
+    color: #797979;
+    text-align: left;
+    font-weight: bold;
+    background-color: inherit;
+    border-right: none;
+}
+br {
+    margin: 0;
+    padding: 0;
+}
+p.failure {
+    font-weight: bold;
+    color: #8B0000;
+}
+.updatedMo {
+    font-weight: bold;
+    color: blue;
+    font-size: 115%;
+}
+p.check {
+    font-weight: bold;
+    color: blue;
+    font-size: 115%;
+}
+p.userInfo {
+}
+span.reportFields {
+    font-style: italic;
+    color: blue;
+}
